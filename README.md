@@ -1,0 +1,1 @@
+This repository contains exercises I have worked on from CodeEval (www.codeeval.com).
