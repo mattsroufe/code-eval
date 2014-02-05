@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+# chmod +x bin/cash_register to make executable
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'debugger'
+require 'discount_offers'
+
+File.open(ARGV[0]).each_line do |line|
+  input = line.split(";")
+  customers = input[0].split(',')
+  products = input[1].split(',')
+  Calculator.new(customers, products)
+end
