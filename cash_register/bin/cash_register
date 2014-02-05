@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+# chmod +x bin/cash_register to make executable
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'cash_register'
+
+File.open(ARGV[0]).each_line do |line|
+  array = line.split(";")
+  price = array[0].chomp
+  cash = array[1].chomp
+  sale = CashRegister.new(price, cash)
+  puts sale.output
+end

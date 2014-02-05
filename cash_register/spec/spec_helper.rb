@@ -1,0 +1,1 @@
+require 'cash_register'
