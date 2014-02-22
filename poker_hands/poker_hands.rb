@@ -113,9 +113,9 @@ class Hand
   end
 end
 
-File.open(ARGV[0]).each_line do |line|
-  cards = line.split(' ')
-  left = Hand.new(cards.slice(0,5))
-  right = Hand.new(cards.slice(5,10))
-  puts Hand.winner(left, right)
-end
+# File.open(ARGV[0]).each_line do |line|
+#   cards = line.split(' ')
+#   left = Hand.new(cards.slice(0,5))
+#   right = Hand.new(cards.slice(5,10))
+#   puts Hand.winner(left, right)
+# end
