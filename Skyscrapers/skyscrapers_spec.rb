@@ -44,6 +44,20 @@ class Array
 
     coordinates
   end
+
+  def draw
+    var = self[0][0]
+    arr = [var]
+    x_or_y = 0
+    self.each do |e|
+      if e[x_or_y] != var
+        arr << var = e[x_or_y == 1 ? 0 : 1]
+        x_or_y = x_or_y == 1 ? 0 : 1
+      end
+    end
+    arr << 0
+    arr.join(' ')
+  end
 end
 
 describe Array do
@@ -70,6 +84,13 @@ describe Array do
       expect(array_2.to_coordinates).to eq(coord_2)
       expect(array_3.to_coordinates).to eq(coord_3)
       expect(array_4.to_coordinates).to eq(coord_4)
+    end
+  end
+
+  describe "#draw" do
+    it "returns coordinates as a line" do
+      expect(coord_1.draw).to eq('1 2 3 0')
+      expect(coord_2.draw).to eq('2 4 6 0')
     end
   end
 end
