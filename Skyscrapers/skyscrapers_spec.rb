@@ -2,11 +2,20 @@ require 'byebug'
 
 class Skyline
   def self.coordinates(*buildings)
+    buildings.sort_by! { |e| e.first }
     coordinates = buildings.delete_at(0).to_coordinates
     while buildings.any?
       coordinates = coordinates.combine(buildings.delete_at(0).to_coordinates)
     end
     coordinates
+  end
+
+  def self.building_blocks(*buildings)
+    buildings.each_with_object([]) do |building, building_blocks|
+      building.blocks.each do |building_block|
+        building_blocks << building_block unless building_blocks.include?(building_block)
+      end
+    end
   end
 end
 
@@ -58,6 +67,10 @@ class Array
     arr << 0
     arr.join(' ')
   end
+
+  def blocks
+    (self[0]...self[2]).to_a.product((1..self[1]).to_a)
+  end
 end
 
 describe Array do
@@ -96,11 +109,20 @@ describe Array do
 
   describe "#draw" do
     it "returns coordinates as a line" do
+      expect(array_1.blocks.draw).to eq('1 2 3 0')
       expect(coord_1.draw).to eq('1 2 3 0')
       expect(coord_2.draw).to eq('2 4 6 0')
+      expect(Skyline.coordinates([1,2,3],[1,4,3]).draw).to eq('1 4 3 0')
       expect(Skyline.coordinates([1,2,3],[2,4,6],[4,5,5],[7,3,11],[9,2,14],[13,7,15],[14,3,17]).draw).to eq('1 2 2 4 4 5 5 4 6 0 7 3 11 2 13 7 15 3 17 0')
+      expect(Skyline.coordinates([13,7,15],[2,4,6],[1,2,3],[4,5,5],[7,3,11],[9,2,14],[14,3,17]).draw).to eq('1 2 2 4 4 5 5 4 6 0 7 3 11 2 13 7 15 3 17 0')
       expect(Skyline.coordinates([2,22,3],[6,12,10],[15,6,21]).draw).to eq('2 22 3 0 6 12 10 0 15 6 21 0')
       expect(Skyline.coordinates([1,2,6],[9,23,22],[22,6,24],[8,14,19],[23,12,30]).draw).to eq('1 2 6 0 8 14 9 23 22 6 23 12 30 0')
+    end
+  end
+
+  describe "#blocks" do
+    it "returns the builing's blocks" do
+      expect(array_1.blocks).to eq([[1, 1], [1, 2], [2, 1], [2, 2]])
     end
   end
 end
@@ -114,6 +136,13 @@ describe Skyline do
   describe ".coordinates" do
     it "returns the skyline coordinates" do
       expect(Skyline.coordinates(building_1, building_2, building_3)).to eq([[1,0], [1,1], [1,2], [2,2], [2,3], [2,4], [3,4], [4,4], [4,5], [5,5], [5,4], [6,4], [6,3], [6,2], [6,1], [6,0]])
+    end
+  end
+
+  describe ".building_blocks" do
+    it "returns the building blocks" do
+      expect(Skyline.building_blocks(building_1)).to eq([[1, 1], [1, 2], [2, 1], [2, 2]])
+      expect(Skyline.building_blocks(building_1, building_2)).to eq([[1, 1], [1, 2], [2, 1], [2, 2], [2, 3], [2, 4], [3, 1], [3, 2], [3, 3], [3, 4], [4, 1], [4, 2], [4, 3], [4, 4], [5, 1], [5, 2], [5, 3], [5, 4]])
     end
   end
 end
