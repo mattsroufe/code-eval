@@ -8,30 +8,26 @@ class Skyline
   end
 
   def draw
-    points = roof_lines.delete_at(0)
-    x = points[0] + 1
-
-    roof_lines.each do |line|
-      if line[1] == points.last
-        x = line[0] + 1
-      elsif line[0] !=  x
-        points.push(x, 0, line[0], line[1])
-        x = line[0] + 1
+    roof_lines.each_with_object([]) do |line, points|
+      if points.empty?
+        points.push(line.start_point, line.height, line.end_point)
+      elsif line.height == points[-2]
+        points[-1] = line.end_point
+      elsif line.start_point != points.last
+        points.push(0, line.start_point, line.height, line.end_point)
       else
-        points.push(x, line[1])
-        x += 1
+        points.push(line.height, line.end_point)
       end
-    end
-
-    points.push(x, 0).join(' ')
+    end.push(0).join(' ')
   end
 
   def roof_lines
-    @buildings.each_with_object({}) do |building, hash|
-      building.roof_lines.each do |key, value|
-        hash[key] = value if value > hash[key].to_i
+    @buildings.each_with_object([]) do |building, lines|
+      building.roof_lines.each do |roof_line|
+        lines.delete_if { |line| line.start_point == roof_line.start_point && line.height < roof_line.height }
+        lines.push(roof_line) unless lines.any? { |line| line.start_point == roof_line.start_point }
       end
-    end.sort
+    end.sort_by(&:start_point)
   end
 end
 
@@ -41,9 +37,13 @@ class Building
   end
 
   def roof_lines
-    (@dimensions[0]...@dimensions[2]).each_with_object({}) { |i, hash| hash[i] = @dimensions[1] }
+    (@dimensions[0]...@dimensions[2]).map do |i|
+      Line.new(i, i + 1, @dimensions[1])
+    end
   end
 end
+
+Line = Struct.new(:start_point, :end_point, :height)
 
 describe Skyline do
   let(:skyline) { Skyline.new([]) }
@@ -59,8 +59,10 @@ describe Skyline do
 
   describe "#roof_lines" do
     it "returns the roof lines" do
-      expect(Skyline.new([1,2,3]).roof_lines).to eq([[1, 2], [2, 2]])
-      expect(Skyline.new([1,2,3], [2,4,6]).roof_lines).to eq([[1, 2], [2, 4], [3, 4], [4, 4], [5, 4]])
+      expect(Skyline.new([1,2,3]).roof_lines).to eq([Line.new(1, 2, 2), Line.new(2, 3, 2)])
+      expect(Skyline.new([1,2,3], [2,4,6]).roof_lines).to eq(
+        [Line.new(1,2,2), Line.new(2,3,4), Line.new(3,4,4), Line.new(4,5,4), Line.new(5,6,4)]
+      )
     end
   end
 end
@@ -68,7 +70,9 @@ end
 describe Building do
   describe "#roof_lines" do
     it "returns the building's roof lines" do
-      expect(Building.new([2,4,6]).roof_lines).to eq({2 => 4, 3 => 4, 4 => 4, 5 => 4})
+      expect(Building.new([2,4,6]).roof_lines).to eq(
+        [Line.new(2,3,4), Line.new(3,4,4), Line.new(4,5,4), Line.new(5,6,4)]
+      )
     end
   end
 end
